@@ -1,0 +1,5 @@
+<odoo>
+    <data noupdate="1">
+        <function model="res.partner" name="cust_method"/>
+    </data>
+</odoo>

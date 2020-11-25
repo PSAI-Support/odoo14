@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+        <record id="action_personal_emails" model="ir.actions.act_url">
+            <field name="name">Personal Emails</field>
+            <field name="url">/web_emails</field>
+            <field name="target">self</field>
+        </record>
+
+        <record id="menu_website_action_personal_emails" model="ir.ui.menu">
+            <field name="name">Personal Emails</field>
+            <field name="sequence" eval="2"/>
+            <field name="action" ref="action_personal_emails"/>
+            <field name="groups_id" eval="[(6,0, [ref('personal_emails')])]"/>
+        </record>
+
+</odoo>

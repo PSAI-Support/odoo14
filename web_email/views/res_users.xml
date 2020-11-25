@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+
+        <record id="res_users_form_inherited" model="ir.ui.view">
+            <field name="name">res.users.form.inherited</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[@name='access_rights']" position="after">
+                    <page name='external_email_credentials' string="External Email Credentials">
+                        <group>
+                            <field name='personal_email_credentials_ids' context="{'form_view_ref' : 'personal_email_credentials_form'}" nolabel="1">
+                                <tree editable='bottom'>
+                                    <field name="email_address" required='1'/>
+                                    <field name="password" password="True" required='1'/>
+                                    <field name="imap_server" required='1'/>
+                                    <field name="smtp_server" required='1'/>
+                                    <field name="default"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="personal_email_credentials_form">
+            <field name="name">personal.email.credentials.form</field>
+            <field name="model">personal.email.credentials</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="email_address" required='1'/>
+                            <field name="password" password="True" required='1'/>
+                            <field name="imap_server" required='1'/>
+                            <field name="smtp_server" required='1'/>
+                            <field name="default"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

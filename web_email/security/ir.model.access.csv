@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_email_activities_history,name_email_activities_history,model_email_activities_history,base.group_user,1,0,0,0
+access_personal_email_credentials,name_personal_email_credentials,model_personal_email_credentials,,1,1,1,1
+access_contact_contact,access_contact_contact,model_contact_contact,base.group_user,1,0,0,0

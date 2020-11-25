@@ -1,0 +1,663 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="web_email" name="Email">
+            <t t-call="web_email.main_layout">
+            <t t-call="web_email.header_layout"/>
+                <div class="content-wrapper">
+                    <div class='content_first'></div>
+                    <div class='content_second'></div>
+                </div>
+            </t>
+        </template>
+
+        <template id='sub_search_line'>
+            <div class='col-md-2 mt8'>
+                <select class='form-control input-sm' name='fields'>
+                    <option selected='selected' value='all_field'>All Fields</option>
+                    <option value='from'>From</option>
+                    <option value='to'>To</option>
+                    <option value='cc'>Cc</option>
+                    <option value='subject'>Subject</option>
+                </select>
+            </div>
+            <div class='col-md-3 mt8'>
+                <input type='text' class='form-control input-sm search_query_require' name='query' value=""> </input>
+            </div>
+        </template>
+
+        <template id='search_line2'>
+            <div class='row'>
+                 <div class='col-md-1 text-center mt8'>
+                     <a href='#' class='remove_line'><i class="fa fa-times"  ></i></a>
+                 </div>
+                 <t t-call='web_email.sub_search_line'/>
+             </div>
+        </template>
+
+        <template id='search_line'>
+            <div class='row'>
+                 <div class='col-md-1 text-center mt8'>
+                     <b>Search</b>
+                 </div>
+                 <t t-call='web_email.sub_search_line'/>
+             </div>
+        </template>
+
+        <template id='compose_new_mail'>
+            <html t-att-data-active_account_id='active_account_id.id'>
+                <head>
+                    <meta charset="utf-8"/>
+                    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+                    <title>Emails</title>
+                    <!-- Tell the browser to be responsive to screen width -->
+                    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+                    
+                    <!-- Bootstrap 3.3.5 -->
+                    <link rel="stylesheet" href="/web_email/static/AdminLTE/bootstrap/css/bootstrap.min.css"/>
+                    <!-- Font Awesome -->
+                    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"/>
+                    <!-- Theme style -->
+                    <link rel="stylesheet" href="/web_email/static/AdminLTE/dist/css/AdminLTE.min.css"/>
+                    <!-- Select2 -->
+                    <link rel="stylesheet" href="/web/static/lib/select2/select2.css"/>
+                    <link rel="stylesheet" href="/web/static/lib/select2-bootstrap-css/select2-bootstrap.css"/>
+                    <!-- bootstrap wysihtml5 - text editor -->
+                    <link rel="stylesheet" href="/web_email/static/AdminLTE/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css"/>
+                    <!-- Custom css -->
+                    <link rel="stylesheet" href="/web_email/static/src/css/custom.scss"/>
+                    
+                </head>
+                <body class="hold-transition skin-blue">
+                    <!-- jQuery 2.1.4 -->
+                    <script src="/web_email/static/AdminLTE/plugins/jQuery/jQuery-2.1.4.min.js"></script>
+                    <!-- Bootstrap 3.3.5 -->
+                    <script src="/web_email/static/AdminLTE/bootstrap/js/bootstrap.min.js"></script>
+                    <!-- Bootstrap WYSIHTML5 -->
+                    <script src="/web_email/static/tinymce/tinymce.min.js"></script>
+                    <script src="/web_email/static/AdminLTE/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+                    <!-- Select2 -->
+                    <script src="/web/static/lib/select2/select2.js"></script>
+                    <script src="/web_email/static/src/js/circular-progress.js"></script>
+                    <!-- AdminLTE App -->
+                    <script src="/web_email/static/src/js/compose.js"></script>
+                    <div style="background-color: #ecf0f5;">
+                        <div class="content_first"></div>
+                    </div>
+                </body>
+            </html>
+        </template>
+
+        <template id="compose_mail">
+            <!-- Main content -->
+        <section class="content">
+          <div class="row">
+            <div class="col-lg-12 col-sm-12 col-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Compose New Mail</h3>
+                </div>
+                <div class="box-footer">
+                    <button t-att-data-email_id='email_id' t-att-data-folder_name='folder_name' t-att-data-mail_type='mail_type' t-att-data-partner_id='partner_id' class="btn btn-primary send-button btn-sm"><i class="fa fa-envelope-o"></i> Send</button>
+                    <button t-if="email_id and mail_type!='send_draft'" class="btn btn-default send-delete-button btn-sm" data-send_delete='true' t-att-data-partner_id='partner_id' t-att-data-mail_type='mail_type' t-att-data-folder_name='folder_name' t-att-data-email_id='email_id' data-toggle="tooltip" title="Send and Delete"><i class="fa fa-times"  ></i> Send and Delete</button>
+                    <div style="width: 300px;display: inline-table;" t-if="email_id and mail_type!='send_draft'">
+                        <select class="form-control input-sm" name='move_folders_names'>
+                                <option selected="selected" value=''>Move to Folder</option>
+                                <t t-foreach='folder_names' t-as='label'>
+                                    <option t-att-value='label[1]'><t t-esc='label[0]'/></option>
+                                </t>
+                        </select>
+                        <span class="input-group-append">
+                            <button class='btn btn-default send-move-button' data-send_move='true' t-att-data-partner_id='partner_id' t-att-data-mail_type='mail_type' t-att-data-folder_name='folder_name' t-att-data-email_id='email_id' data-toggle="tooltip" title="Send and Move">Send and Move</button>
+                        </span>
+                    </div>
+                    <button type="button" class="btn btn-default attach-button btn-sm"><i class="fa fa-paperclip"></i> Attach File</button>
+                    <span class="dropdown">
+                        <button class="btn btn-default dropdown-toggle btn-sm" type="button" data-toggle="dropdown">
+                        <i class="fa fa-floppy-o"  ></i> Save as<span class="caret"></span></button>
+                        <ul class="dropdown-menu">
+                            <li value=""><a t-att-data-email_id='email_id' class="draft-button" href="#">Draft</a></li>
+                        </ul>
+                    </span>
+                </div>
+                <div class="box-body">
+                  <div class="form-group">
+                    <input class="form-control" t-att-value='personal_email' name='from' placeholder="From:" readonly="1"/>
+                  </div>
+                  <div class="form-group">
+                    <input type="email" class="form-control" t-att-value='reply_to_all_emails' name='to' placeholder="To:"/>
+                  </div>
+                  <div class="form-group">
+                    <input class="form-control" t-att-value='msg_cc' name='cc' placeholder="Cc:"/>
+                  </div>
+                  <div class="form-group">
+                    <input class="form-control" t-att-value='bcc_all' name='bcc' placeholder="Bcc:"/>
+                  </div>
+                  <div class="form-group">
+                    <input class="form-control" t-att-value='subject' name='subject' placeholder="Subject:"/>
+                  </div>
+                  <div class="form-group">
+                    <textarea id="compose-textarea" class="form-control" spellcheck="true" autocorrect="true" placeholder='Body' style='height: 300px;overflow-x: auto;' contentEditable="true">
+                        <t t-raw='inline_body'/>
+                        <t t-raw='signature'/>
+                    </textarea>
+                  </div>
+                  <div class="col-md-12 mt8">
+                    <div class="row">
+                        <input type="file" name="attach" class="hidden attach"/>
+                        <div class="attach_list"></div>
+                    </div>
+                  </div>
+                </div><!-- /.box-body -->
+              </div><!-- /. box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+        </section><!-- /.content -->
+        </template>
+
+        <template id='form-view-header'>
+            <div class="box-header with-border">
+                <div class='row'>
+                    <div class='col-lg-12 col-sm-12 col-12'>
+                        <div class="btn-group email_folder_name mt8">
+                            <button class="btn btn-default btn-sm reply-to" t-att-data-reply_to='msg_from_email if not folder_name in ["Sent Items","Drafts","Email_Templates"] else msg_to' t-att-data-email_id='email_id' t-att-data-folder_name='folder_name' data-toggle="tooltip" title="Reply"><i class="fa fa-reply"></i> Reply</button>
+                            <button class="btn btn-default btn-sm reply-to-all" t-att-data-reply_to='msg_from_email if not folder_name in ["Sent Items","Drafts","Email_Templates"] else msg_to' t-att-data-reply_to_all_emails='reply_to_all_emails' t-att-data-email_id='email_id' t-att-data-folder_name='folder_name' data-toggle="tooltip" title="Reply to all"><i class="fa fa-reply-all"  /> Reply to All</button>
+                            <button class="btn btn-default btn-sm forward-to" t-att-data-email_id='email_id' t-att-data-folder_name='folder_name' data-toggle="tooltip" title="Forward"><i class="fa fa-share"></i> Forward</button>
+                            <button class="btn btn-default btn-sm delete-button" t-att-data-folder_name='folder_name' t-att-data-email_id='email_id' data-toggle="tooltip" title="Delete"><i class="fa fa-times"  ></i> Delete</button>
+                            <button t-if='request.env.user._is_admin()' class='btn btn-default btn-sm purge-button' t-att-data-email_id='email_id' t-att-data-folder_name='folder_name' data-toggle="tooltip" title="Purge"><i class="fa fa-trash-o"/> Purge</button>
+                            <button class="btn btn-default btn-sm print-button" t-att-data-subject='subject' t-att-data-msg_from='msg_from_email' t-att-data-msg_to='msg_to' t-att-data-folder_name='folder_name' t-att-data-email_id='email_id' data-toggle="tooltip" title="Print"><i class="fa fa-print"></i> Print</button>
+                            <button class='btn btn-default btn-sm mark-as-spam' t-att-data-folder_name='folder_name' t-att-data-email_id='email_id' data-toggle="tooltip" title="Spam"><i class="fa fa-shield"  /> Spam</button>
+                        </div>
+                        <div class="input-group select_folder_name mt8">
+                            <select class="form-control input-sm" name='folders_names_in_form'>
+                                <option selected="selected" value=''>Select Folder</option>
+                                <t t-foreach='folder_names' t-as='label'>
+                                    <option t-att-value='label[1]'><t t-esc='label[0]'/></option>
+                                </t>
+                            </select>
+                            <span class="input-group-append">
+                                <button class='btn btn-default move-records-form-view' t-att-data-folder_name='folder_name' t-att-data-email_id='email_id'><span class='fa fa-arrow-right'/></button>
+                            </span>
+                        </div>
+                       <div class="input-group email_pager_all mt8">
+                           <select name='more_actions' class='form-control input-sm'>
+                               <option value='' selected='selected'>More Actions</option>
+                               <option disabled='disabled'>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>
+                               <option value="view_messages">View Message in New Tab</option>
+                               <option disabled='disabled'>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>
+                               <option value='unseen'>Mark as Unread</option>
+                               <option value='seen'>Mark as Read</option>
+                               <option disabled='disabled'>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>
+                               <option value="reply">Reply</option>
+                               <option value="reply_to_all">Reply to All</option>
+                               <option value="forward">Forward</option>
+                               <option disabled='disabled'>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>
+                               <option value="print">Print</option>
+                               <option value="save">Save</option>
+                               <option disabled='disabled'>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>
+                               <option value="flag">Flag</option>
+                               <option value="unflag">Clear Flag</option>
+                               <option disabled='disabled'>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>
+                               <option value="to_spam">This is Spam</option>
+                               <option disabled='disabled'>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>
+                               <option t-if='request.uid == superuser_id' value="purge">Purge</option>
+                           </select>
+                           <span class="input-group-append">
+                               <input class="hidden" t-att-data-email_id='email_id' t-att-data-reply_to='msg_from_email' t-att-data-reply_to_all_emails='reply_to_all_emails'></input>
+                               <button class='btn btn-default more-actions' t-att-data-folder_name='folder_name' t-att-data-email_id='email_id'><span class='fa fa-arrow-right'/></button>
+                           </span>
+                       </div>
+                   </div>
+                </div>
+            </div>
+        </template>
+
+        <template id='email_form_view'>
+            <!-- Main content -->
+            <section class="content">
+              <div class="row">
+                <div class="col-lg-12 col-sm-12 col-12">
+                  <div class="box box-primary">
+                    <div class="box-header with-border">
+                      <h3 class="box-title subject" style="float: left;"><t t-esc='subject'/><t t-if='attachments'><![CDATA[&nbsp;]]><![CDATA[&nbsp;]]><i class="fa fa-paperclip"  ></i></t></h3>
+                      <div t-if='next_issue_record' class="" style="float: left;margin-left: 14px;">
+                        <a href="#" class="btn btn-box-tool traverse-button" t-att-data-email_id='next_issue_record' data-toggle="tooltip" title="Previous"><i class="fa fa-chevron-left"></i></a>
+                        <a href="#" class="btn btn-box-tool traverse-button" t-att-data-email_id='prev_issue_record' data-toggle="tooltip" title="Next"><i class="fa fa-chevron-right"></i></a>
+                      </div>
+                    </div><!-- /.box-header -->
+                    <t t-call='web_email.form-view-header'/>
+                    <div class="box-body no-padding">
+                      <div class="mailbox-read-info">
+                        
+                        <h5><b>From:</b> <span t-if='msg_from_name' class='msg_from_name'><t t-esc='msg_from_name'/></span> &amp;lt;<span class='msg_from_email'><t t-esc='msg_from_email'/></span>&amp;gt;  <a href='#' t-if='not contact_exist' class='add-to-contact-from-form-view'> Add to Contacts</a> <!--<span class="mailbox-read-time pull-right"><t t-esc='date'/></span>--></h5>
+                        <h5><b>To:</b> <t t-esc='msg_to'/> </h5>
+                        <h5><b>Date:</b> <t t-esc='date'/></h5>
+                        <h5 t-if='msg_cc'><b>Cc:</b> <t t-esc='msg_cc'/> </h5>
+                      </div>
+                      <div class="mailbox-read-message">
+                        <t t-raw='body'/>
+                      </div>
+                    </div>
+                    <div class="box-footer" t-if='attachments'>
+                       <div class='row'>
+                           <div class='col-lg-12 col-sm-12 col-12'>
+                               <b>Attachments</b>
+                           </div>
+                       </div>
+                        <t t-foreach='attachments' t-as='attach'>
+                            <div class='row'>
+                                <div class='col-lg-12 col-sm-12 col-12'>
+                                    <a target='_blank' t-att-download='attach[0][0]' t-att-href="'data:%s;base64,%s' % (attach[0][1],attach[1])"><t t-esc='attach[0][0]'/></a>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+        </template>
+        
+        <template id='search-record-form-view'>
+            <t t-call='web_email.form-view-header'/>
+            <div class="box-header with-border">
+                <h3 class="box-title subject"><t t-esc='subject'/></h3>
+              </div>
+              <div class="box-body no-padding">
+                <div class="mailbox-read-info">
+                    <h5><b>From: </b><t t-esc='msg_from'/> </h5>
+                    <h5><b>To: </b><t t-esc='msg_to'/> </h5>
+                    <h5><b>Date: </b><t t-esc='date'/> </h5>
+                    <h5 t-if='msg_cc'><b>Cc:</b> <t t-esc='msg_cc'/> </h5>
+
+                </div>
+                <div class="mailbox-read-message">
+                  <t t-raw='body'/>
+                </div>
+              </div>
+              <div class="box-footer" t-if='attachments'>
+                   <div class='row'>
+                       <div class='col-lg-12 col-sm-12 col-12'>
+                           <b>Attachments</b>
+                       </div>
+                   </div>
+                    <t t-foreach='attachments' t-as='attach'>
+                        <div class='row'>
+                            <div class='col-lg-12 col-sm-12 col-12'>
+                                <a target='_blank' t-att-download='attach[0][0]' t-att-href="'data:%s;base64,%s' % (attach[0][1],attach[1])"><t t-esc='attach[0][0]'/></a>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+        </template>
+
+        <template id='searched_email_lines'>
+            <section class="content">
+              <div t-if='records_list' class="row">
+                <div class="col-lg-4 col-sm-4 col-4">
+                  <div class="box search-mail-content-custom" style="padding:0px;overflow-y: overlay;overflow-x: hidden;margin-bottom: 0px;">
+                    <div class="box-header">
+                        <div class='row'>
+                            <div class='col-lg-12 col-sm-12 col-12'>
+                                <h3 class="box-title">Search Result</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body table-responsive" style='padding: 0px;overflow-x: hidden;'>
+                        <table class='table table-hover' id='search-records'>
+                            <t t-foreach='records_list' t-as='record'>
+                                <t t-foreach='record["list_of_records"]' t-as='rec'>
+                                    <tr class='open-search-record' t-att-data-email_id='rec["email_id"]' t-att-data-folder_name='rec["folder_name"]'>
+                                        <td>
+                                            <div class='row'>
+                                                <div class='col-lg-12 col-sm-12 col-12 search_view_line1_truncate' style="font-size: 16px;">
+                                                    <t t-esc='rec["from"]'/>
+                                                </div>
+                                            </div>
+                                            <div class='row'>
+                                                <div class='col-lg-9 col-sm-9 col-12 search_view_line2_truncate' style="font-size: 13px;color: grey;">
+                                                    <t t-esc='rec["subject"]'/>
+                                                </div>
+                                                <div class='col-lg-4 col-sm-4 col-12' style="font-size: 11px;color: grey;">
+                                                    <t t-esc='rec["date"]'/>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-8 col-sm-8 col-8">
+                    <div class="box box-primary search-mail-content-custom show-search-email" style="overflow-y: overlay;overflow-x: overlay;margin-bottom: 0px;">
+                        <div class='empty-view text-center'>We didn't find anything to show here.</div>
+                    </div>
+                </div>
+              </div>
+              <div t-if='not records_list' class='row'>
+                    <div class='col-lg-12 col-sm-12 col-12'>
+                        No records found.
+                    </div>
+              </div>
+            </section>
+        </template>
+
+        <template id='email_lines'>
+            <section class="content">
+              <div class="row">
+                <div class="col-lg-12 col-sm-12 col-12">
+                  <div class="box">
+                      <div class='box-header with-border'>
+                        <div class='col-lg-12 col-sm-12 col-12'>
+                            <div class='row'>
+                                <div class="mt8 col-lg-12 col-sm-12 col-12">
+                                    <h3 class="box-title"><t t-esc='folder_name'/></h3>
+                                </div>
+                                <t t-if='pager'>
+                                    <div class="mt8 col-1">
+                                    <select name='limit_selection' class='form-control'>
+                                        <option t-att-selected='"selected" if step == 15 else none' value='15'>15</option>
+                                        <option t-att-selected='"selected" if step == 20 else none' value='20'>20</option>
+                                        <option t-att-selected='"selected" if step == 35 else none' value='35'>35</option>
+                                        <option t-att-selected='"selected" if step == 50 else none' value='50'>50</option>
+                                        <option t-att-selected='"selected" if step == max_value else none' t-att-value='max_value'>ALL</option>
+                                    </select>
+                                    </div>
+                                    <div t-if="pager['page_count'] > 1" class='email_pager mt8 col-11'>
+                                        <t t-call="website.pager" t-set-class="float-right"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                      </div>
+
+                     <div class="box-header with-border">
+                        <div class=''>
+                            <div class='row'>
+                                <div class="col-6 btn-group email_folder_name mt8">
+                                    <button class="btn btn-default btn-sm list-view-reply-to" data-toggle="tooltip" title="Reply"><i class="fa fa-reply"></i> Reply</button>
+                                    <button class="btn btn-default btn-sm list-view-reply-to-all" data-toggle="tooltip" title="Reply to all"><i class="fa fa-reply-all"  /> Reply to All</button>
+                                    <button class="btn btn-default btn-sm list-view-forward-to" data-toggle="tooltip" title="Forward"><i class="fa fa-share"></i> Forward</button>
+                                    <button class="btn btn-default btn-sm list-view-delete-button" data-toggle="tooltip" title="Delete"><i class="fa fa-times"  ></i> Delete</button>
+                                    <button t-if='request.env.user._is_admin()' class='btn btn-default btn-sm list-purge-button' data-toggle="tooltip" title="Purge"><i class="fa fa-trash-o"/> Purge</button>
+                                    <button class='btn btn-default btn-sm list-view-mark-as-spam' data-toggle="tooltip" title="Spam"><i class="fa fa-shield"  /> Spam</button>
+                                </div>
+                                <div class="input-group select_folder_name mt8">
+                                    <select name='folder_names' class='form-control input-sm'>
+                                        <option selected="selected" value=''>Select Folder</option>
+                                        <t t-foreach='labels' t-as='label'>
+                                            <option t-att-value='label[1]'><t t-esc='label[0]'/></option>
+                                        </t>
+                                    </select>
+
+                                    <span class="input-group-append">
+                                        <button class='btn btn-default move-records'><span class='fa fa-arrow-right'/></button>
+                                    </span>
+                                </div>
+                                <div class="input-group email_pager_all mt8">
+                                    <select name='list_more_actions' class='form-control input-sm'>
+                                        <option value='' selected='selected'>More Actions</option>
+                                        <option disabled='disabled'>-------------------------------------------</option>
+                                        <option value='list_view_messages'>View Message in New tab</option>
+                                        <option disabled='disabled'>-------------------------------------------</option>
+                                        <option value='list_unseen'>Mark as Unread</option>
+                                        <option value='list_seen'>Mark as Read</option>
+                                        <option disabled='disabled'>-------------------------------------------</option>
+                                        <option value='list_reply'>Reply</option>
+                                        <option value='list_reply_to_all'>Reply to All</option>
+                                        <option value='list_forward'>Forward</option>
+                                        <option disabled='disabled'>-------------------------------------------</option>
+                                        <option value="list_print">Print</option>
+                                        <option value='list_save'>Save</option>
+                                        <option disabled='disabled'>-------------------------------------------</option>
+                                        <option value="list_flag">Flag</option>
+                                        <option value="list_unflag">Clear Flag</option>
+                                        <option disabled='disabled'>-------------------------------------------</option>
+                                        <option value='list_to_spam'>This is Spam</option>
+                                        <option disabled='disabled'>-------------------------------------------</option>
+                                        <option t-if='request.uid == superuser_id' value="list_purge">Purge</option>
+                                    </select>
+                                    <span class="input-group-append">
+                                        <button class='btn btn-default list-more-actions'><span class='fa fa-arrow-right'/></button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body table-responsive">
+                      <table id="inbox_table" class="table table-bordered table-hover">
+                        <thead t-if='email_list'>
+                            <tr>
+                                <th class='text-center'>
+                                    <input type="checkbox" name="select_all_move_records" class="select_all_move_records" />
+                                </th>
+                                <t t-if='folder_name in ["Sent Items","Drafts"]'>
+                                   <th>To</th>
+                                </t>
+                                <t t-if='not folder_name in ["Sent Items","Drafts","Email_Templates"]'>
+                                    <th>From</th>
+                                </t>
+                                <t t-if='folder_name in ["Email_Templates"]'>
+                                    <th>Template Name</th>
+                                </t>
+                                <th>Subject</th>
+                                <th class='text-center'>Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach='email_list' t-as='email'>
+                                <tr t-att-class='"draggable unread_mail" if email["new_mail"] else "draggable"'>
+                                    <td class='text-center'>
+                                        <input type="checkbox" name="move_records" t-att-data-reply_to='email["from"] if not folder_name in ["Sent Items","Drafts","Email_Templates"] else email["to"]' t-att-data-reply_to_all_emails='email["reply_to_all_emails"]'  t-att-data-email_id='email["email_id"]' class="selected-records" />
+                                    </td>
+                                    <td>
+                                        <t t-if='folder_name in ["Sent Items","Drafts"]'>
+                                            <a href='#' t-att-data-email_id='email["email_id"]' class='email_record'>
+                                                <div class='from_truncate'>
+                                                    <t t-if='email["to"]' t-esc='email["to"]'/>
+                                                </div>
+                                            </a>
+                                        </t>
+                                        <t t-if='not folder_name in ["Sent Items","Drafts","Email_Templates"]'>
+                                            <a href='#' t-att-data-email_id='email["email_id"]' class='email_record'>
+                                                <div class='from_truncate'>
+                                                    <t t-if='email["from"]' t-esc='email["from"]'/>
+                                                </div>
+                                            </a>
+                                        </t>
+                                        <t t-if='folder_name in ["Email_Templates"]'>
+                                            <a href='#' t-att-data-email_id='email["email_id"]' class='email_record'>
+                                                <div class='from_truncate'>
+                                                    <t t-if='email["template_name"]' t-esc='email["template_name"]'/>
+                                                </div>
+                                            </a>
+                                        </t>
+                                    </td>
+                                    <td>
+                                        <a href='#' t-att-data-email_id='email["email_id"]' class='email_record'>
+                                            <div class='truncate'>
+                                                <i t-att-data-email_id="email['email_id']+'_flag'" t-att-class="'fa fa-flag' if email['flagged'] else 'fa fa-flag hidden'"  ></i><![CDATA[&nbsp;]]>
+                                                <t t-if='email["has_attachment"]'>
+                                                    <i class="fa fa-paperclip"  ></i><![CDATA[&nbsp;]]>
+                                                </t>
+                                                <t t-if='email["subject"]' t-esc='email["subject"]'/>
+                                            </div>
+                                        </a>
+                                    </td>
+                                    <td class='text-center'>
+                                        <a href='#' t-att-data-email_id='email["email_id"]' class='email_record'>
+                                            <div class='truncate'>
+                                                <t t-if='email["date"]' t-esc='email["date"]'/>
+                                            </div>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-if='not email_list'>
+                                <tr>
+                                    <td>Records not found.</td>
+                                </tr>
+                            </t>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+        </template>
+
+        <template id='display_contacts'>
+            <t t-foreach='contacts' t-as='contact'>
+                <tr>
+                    <td class='text-center'>
+                        <input type="checkbox" t-att-data-contact_id='contact.id' name="select_contact" class="select_contact" />
+                    </td>
+                    <td>
+                        <a href='#' class='compose-mail-from-contact' t-att-data-contact_id='contact.id'>
+                            <t t-esc='contact.name'/>
+                        </a>
+                    </td>
+                    <td>
+                        <a href='#' class='compose-mail-from-contact' t-att-data-contact_id='contact.id'>
+                            <t t-esc='contact.last_name'/>
+                        </a>
+                    </td>
+                    <td>
+                        <a href='#' t-att-data-contact_id='contact.id' class='compose-mail-from-contact'>
+                            <t t-esc='contact.email_address'/>
+                        </a>
+                    </td>
+                    <td>
+                        <a href='#' t-att-data-contact_id='contact.id' class='compose-mail-from-contact'>
+                            <t t-esc='contact.company_name'/>
+                        </a>
+                    </td>
+                    <td class="text-center">
+                        <button t-att-data-contact_id='contact.id' class='btn btn-default btn-xs edit-contact'><i class="fa fa-pencil-square-o fa-sm"  ></i></button>
+                        <button t-att-data-contact_id='contact.id' class='btn btn-default btn-xs unlink-contact'><i class="fa fa-eraser fa-sm"  /></button>
+                    </td>
+                </tr>
+            </t>
+            <t t-if='not contacts'>
+                <tr>
+                    <td>Contacts not found.</td>
+                </tr>
+            </t>
+        </template>
+
+        <template id='contact_lines'>
+            <section class="content">
+              <div class="row">
+                <div class="col-lg-12 col-sm-12 col-12">
+                  <div class="box">
+                    <div class="box-header">
+                        <div class='row'>
+                            <div class='col-md-2 mt4'>
+                                <h3 class="box-title">Contacts</h3>
+                            </div>
+                            <div class='col-md-2 mt4'>
+                                <input type='text' class='form-control' name='contact_search_query' placeholder='Search Contacts...'/>
+                            </div>
+                            <div class='pull-right'>
+                            <div class='col-md-6 mt4 hidden'>
+                                <button class='btn btn-default btn-sm delete-contacts' title="Delete">Delete</button>
+                            </div>
+                            <div class='col-md-6 mt4'>
+                            </div>
+                            </div>
+                            <div class="modal fade import-conatcts-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+                                <div class="modal-dialog modal-sm">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span  >&amp;times;</span></button>
+                                            <h4 class="modal-title" id="gridSystemModalLabel">Import Contacts</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class='row'>
+                                                <div class='col-md-12'>
+                                                    <div class="form-group">
+                                                        <label for="folder_name">Select a File:</label>
+                                                        <input class='form-control' type="file" id="files"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer text-center">
+                                            <button type="button" class="btn btn-primary import-contacts" data-dismiss="modal">Import</button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                        </div>
+                                     </div>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+                    <div class="box-body table-responsive">
+                      <table id="inbox_table" class="table table-bordered table-hover">
+                        <thead t-if='contacts'>
+                            <tr>
+                                <th class='text-center'>
+                                    <input type="checkbox" name="select_all_contact" class="select_all_contact" />
+                                </th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email Address</th>
+                                <th>Company Name</th>
+                                <th class="text-center">Actions</th>
+                              </tr>
+                        </thead>
+                        <tbody class='display_contacts'>
+                            <t t-call='web_email.display_contacts'/>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+        </template>
+
+        <template id='edit_contact'>
+            <div id="edit-contact-modal-sm" class="modal fade edit-contact-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="gridSystemModalLabel">Edit Contact</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span  >&amp;times;</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class='row'>
+                                <div class='col-lg-12 col-sm-12 col-12'>
+                                    <div class="form-group">
+                                        <label for="folder_name">First Name *</label>
+                                        <input type="text" class="form-control" t-att-value='contact.name' name='first_name' placeholder="First Name"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="folder_name">Last Name *</label>
+                                        <input type="text" class="form-control" t-att-value='contact.last_name' name='last_name' id="last_name" placeholder="Last Name"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="folder_name">Company Name</label>
+                                        <input type="text" class="form-control" t-att-value='contact.company_name' name='company_name' id="company_name" placeholder="Company Name"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="folder_name">Email Address *</label>
+                                        <input type="text" class="form-control" t-att-value='contact.email_address' name='email_address' placeholder="Email Address"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer text-center">
+                            <button type="button" class="btn btn-primary modal-save-contact" t-att-data-contact_id='contact.id'>Save</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        </div>
+                     </div>
+                 </div>
+             </div>
+        </template>
+
+    </data>
+</odoo>

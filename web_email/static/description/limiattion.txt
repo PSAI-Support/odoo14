@@ -1,0 +1,6 @@
+=========Odoo web Email limitations ==================
+1] Forward mail as attachment will not work.
+2] If you are using any other language then English, then sometime it will not let you send draft mails, due to folder name being changed.
+3] If you are sending a new mail and want to attach image, then you can attach online images only.
+4] At the time of managing hirarchical folders, when you delete any parent folder then it will not delete link of its child folder. Thus it will show as a folder in mail interface, but was not actually available for operation. So if you click on such folders, it will show traceback.
+5] you can not able to select mails between pages, like gmail provides functionality of selcting mail from 1-15 for example, and then if you load next 15 mails then you can able to update previously sleected mail through these pages, but in odoo web mail it is not possible yet.

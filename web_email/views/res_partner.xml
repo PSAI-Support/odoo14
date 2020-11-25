@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_partner_form_send_mail" model="ir.ui.view">
+            <field name="name">inherited.view.partner.form.send.mail</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="arch" type="xml">
+                <field name="email" position="replace">
+                    <field name="email" required="1"/>
+                    <field name="company_name"/>
+                </field>
+                <xpath expr="//page[@name='internal_notes']" position="after">
+                    <page string="Email Activities" name="email_activities">
+                        <separator string="Email Activities" />
+                        <field name="email_activities_ids" readonly="1"
+                            nolable="1">
+                            <form string="Email Activities">
+                                <group>
+                                    <field name="email_from" />
+                                    <field name="email_to" />
+                                </group>
+                                <group>
+                                    <field name="subject" />
+                                    <field name="date" />
+                                </group>
+                                <notebook>
+                                    <page string="Body">
+                                        <field name="body"
+                                            options="{'style-inline': true}" />
+                                    </page>
+                                </notebook>
+                            </form>
+                            <tree>
+                                <field name="date" />
+                                <field name="subject" />
+                                <field name="email_from" />
+                                <field name="email_to" />
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

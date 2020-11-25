@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="personal_emails" model="res.groups">
+            <field name="name">Personal Emails</field>
+            <field name="category_id" ref="base.module_category_usability"/>
+        </record>
+
+    </data>
+</odoo>
