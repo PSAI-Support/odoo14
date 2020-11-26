@@ -14,9 +14,7 @@ class personal_email_credentials(models.Model):
     email_address = fields.Char('User Email Address')
     password = fields.Char('Password')
     imap_server = fields.Char('IMAP Server')
-    imap_port = fields.Char('IMAP Port')
     smtp_server = fields.Char('SMTP Server')
-    smtp_port = fields.Char('SMTP Port')
     default = fields.Boolean('Default')
 
     @api.constrains('default')
@@ -50,7 +48,7 @@ class personal_email_credentials(models.Model):
 
     def write(self, vals):
         mail = imaplib.IMAP4_SSL(self.imap_server)
-        connection = smtplib.SMTP_SSL(self.smtp_server, self.smtp_port)
+        connection = smtplib.SMTP_SSL(self.smtp_server, '465')
         if vals.get('imap_server'):
             try:
                 mail = imaplib.IMAP4_SSL(vals.get('imap_server'))

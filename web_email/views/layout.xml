@@ -12,35 +12,6 @@
 
         <template id="main_layout" name="email Layout">&lt;!DOCTYPE html&gt;
             <html t-att-data-active_account_id='active_account_id.id'>
-                <header t-name="Menu">
-				    <nav class="o_main_navbar">
-				    	<ul id="oe_applications">
-                    		<li class="dropdown active">
-		                    	<button type="button" class="fa fa-bars float-right d-block d-md-none o_mobile_menu_toggle" aria-label="Menu" title="Menu"/>
-							    <a class="dropdown-toggle full o_menu_brand" data-toggle="dropdown" href="#">
-			                            <i class="fa fa-th-large"/> Personal Email
-		                        </a>
-		                        <div class="dropdown-menu" role="menu">
-		                            <t t-set="debug_param" t-value="'?&amp;debug=' if debug else ''"/>
-		                            <t t-as="menu" t-foreach="menu_data['children']">
-		                                <a role="menuitem"
-		                                   t-attf-class="dropdown-item #{'oe_menu_toggler' if menu.get('children') else 'oe_menu_leaf'}"
-		                                   t-att-data-action-id="menu['action'] and menu['action'].split(',')[1] or None"
-		                                   t-att-data-action-model="menu['action'] and menu['action'].split(',')[0] or None"
-		                                   t-att-data-menu="menu['id']"
-		                                   t-att-data-menu-xmlid="menu.get('xmlid')"
-		                                   t-att-href="'/web%s#menu_id=%s&amp;action=%s' % (debug_param, menu['id'], menu['action'] and menu['action'].split(',')[1] or '')">
-		                                    <i t-attf-class="fa #{menu.get('icon')} fa-lg fa-fw" t-if="menu.get('icon')" role="img" aria-label="Menu" title="Menu"/>
-		                                    <span class="oe_menu_text">
-		                                        <t t-esc="menu['name']"/>
-		                                    </span>
-		                                </a>
-		                            </t>
-		                        </div>
-		                    </li>
-		                </ul>
-				    </nav>
-				</header>
                 <head>
                     <meta charset="utf-8"/>
                     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -72,7 +43,8 @@
 
                     <t t-call-assets="web.assets_common"/>
                     <t t-call-assets="web.assets_backend"/>
-                    <t t-call-assets="web_editor.assets_summernote"/>
+                    <!--<t t-call-assets="web_editor.summernote"/>-->
+                    <t t-call-assets="web_editor.assets_wysiwyg"/>
 
                     <t t-call-assets="web_editor.assets_wysiwyg"/>
                     <script type="text/javascript">
@@ -120,6 +92,35 @@
                     <![endif]-->
                     <!-- Custom css -->
                 </head>
+                <header t-name="Menu">
+				    <nav class="o_main_navbar">
+				    	<ul id="oe_applications">
+                    		<li class="dropdown active">
+		                    	<button type="button" class="fa fa-bars float-right d-block d-md-none o_mobile_menu_toggle" aria-label="Menu" title="Menu"/>
+							    <a class="dropdown-toggle full o_menu_brand" data-toggle="dropdown" href="#">
+			                            <i class="fa fa-th-large"/> Personal Email
+		                        </a>
+		                        <div class="dropdown-menu" role="menu">
+		                            <t t-set="debug_param" t-value="'?&amp;debug=' if debug else ''"/>
+		                            <t t-as="menu" t-foreach="menu_data['children']">
+		                                <a role="menuitem"
+		                                   t-attf-class="dropdown-item #{'oe_menu_toggler' if menu.get('children') else 'oe_menu_leaf'}"
+		                                   t-att-data-action-id="menu['action'] and menu['action'].split(',')[1] or None"
+		                                   t-att-data-action-model="menu['action'] and menu['action'].split(',')[0] or None"
+		                                   t-att-data-menu="menu['id']"
+		                                   t-att-data-menu-xmlid="menu.get('xmlid')"
+		                                   t-att-href="'/web%s#menu_id=%s&amp;action=%s' % (debug_param, menu['id'], menu['action'] and menu['action'].split(',')[1] or '')">
+		                                    <i t-attf-class="fa #{menu.get('icon')} fa-lg fa-fw" t-if="menu.get('icon')" role="img" aria-label="Menu" title="Menu"/>
+		                                    <span class="oe_menu_text">
+		                                        <t t-esc="menu['name']"/>
+		                                    </span>
+		                                </a>
+		                            </t>
+		                        </div>
+		                    </li>
+		                </ul>
+				    </nav>
+				</header>
                 <!--
                 BODY TAG OPTIONS:
                 =================

@@ -42,7 +42,7 @@ class res_partner(models.Model):
                 'partner_id': cust.get('id'),
                 'user_id': request.uid
             }
-            if cust.get('name') and ' ' in cust.get('name'):
+            if ' ' in cust.get('name'):
                 full_name = cust.get('name').split(' ')
                 personal_email_contact_vals.update({
                     'name': tools.ustr(full_name[0]),

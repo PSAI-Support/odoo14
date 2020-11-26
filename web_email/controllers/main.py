@@ -34,7 +34,6 @@ def split_list(spl_list, chunk_size):
         spl_list = spl_list[chunk_size:]
     return result_list
 
-
 def filter_email_address(email):
     email = email.strip()
     name = ''
@@ -1298,7 +1297,7 @@ class webEmail(http.Controller):
             else:
                 ids = kwargs.get('email_ids')
         else:
-            mail.select('"' + kwargs.get('folder_name') + '"')
+            mail.select('"' + str(kwargs.get('folder_name')) + '"')
             if 'email_ids' not in kwargs and not kwargs.get('email_ids'):
                 result, ids = mail.search(None, "ALL")
             else:

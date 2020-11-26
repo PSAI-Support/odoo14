@@ -66,7 +66,7 @@
                     <!-- bootstrap wysihtml5 - text editor -->
                     <link rel="stylesheet" href="/web_email/static/AdminLTE/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css"/>
                     <!-- Custom css -->
-                    <link rel="stylesheet" href="/web_email/static/src/css/custom.scss"/>
+                    <link rel="stylesheet"  type="text/scss" href="/web_email/static/src/css/custom.scss"/>
                     
                 </head>
                 <body class="hold-transition skin-blue">

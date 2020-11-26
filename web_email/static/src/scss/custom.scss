@@ -269,10 +269,10 @@ body {
 		}
 	}
 }
-.content {
+/* .content {
 	margin-top: 50px;
-}
-.fixed {
+} */
+.fixed,.layout-boxed {
 	.o_main_navbar {
 		position: fixed;
 		width: 100%;
@@ -591,12 +591,12 @@ body {
 //    display: none !important;
 //}
 @media (min-width: 992px){
-.col-md-1.custom-col-md-1 {
-    width: 9.333333% !important;
-}
+    .col-md-1.custom-col-md-1 {
+        width: 9.333333% !important;
+    }
 }
 
- code for dropdown when hover on lognout button 
+/*  code for dropdown when hover on lognout button  */
 .dropdown_menu_dropbtn {
     color: white;
     padding: 16px;
@@ -639,10 +639,10 @@ body {
 
 
 
-Top bar
-.content {
+/* Top bar */
+/* .content {
 	margin-top: 50px;
-}
+} */
 .fixed .o_main_navbar{
 	position: fixed;
     width: 100%;
@@ -714,19 +714,19 @@ Top bar
     padding-top: 85px;
 }
 @media (max-width: 767px){
-.fixed .content-wrapper, .fixed .right-side {
-    padding-top: 140px;
-}
+    .fixed .content-wrapper, .fixed .right-side {
+        padding-top: 140px;
+    }
 }
 @media (max-width: 767px){
-.main-sidebar, .left-side {
-    padding-top: 135px;
-}
+    .main-sidebar, .left-side {
+        padding-top: 135px;
+    }
 }
 
-.control-sidebar {
+/* .control-sidebar {
     padding-top: 85px;
-}
+} */
 
 
 
@@ -776,7 +776,7 @@ Top bar
     }
 }
 
-Folders Tree
+/* Folders Tree */
 .tree li {
     list-style-type: none;
     margin: 0;
@@ -819,7 +819,7 @@ Folders Tree
     margin-top: 5px;
     margin-bottom: 5px;
 }
-End of Folders Tree
+/* End of Folders Tree */
 
 .navbar .oe_topbar_avatar {
     max-height: 18px;
@@ -834,6 +834,3 @@ End of Folders Tree
 .rename-folder:hover, .delete-folder:hover{
     color: #3c8dbc !important;
 }
-
-
- */

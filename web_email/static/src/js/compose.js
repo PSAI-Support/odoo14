@@ -131,7 +131,8 @@ function compose_mail(view){
             content_css: [
                 '//fast.fonts.net/cssapi/e6dc9b99-64fe-4292-ad98-6974f93cd2a2.css',
                 '//www.tinymce.com/css/codepen.min.css'
-            ]
+            ],
+            relative_urls : false,
         });
         $('input[name="to"]').select2({
             allowClear: true,
@@ -329,60 +330,65 @@ $(function(){
         var file = this.files[0];
         var attach_list = $('.attach_list')
         if (file){
-            x++;
-            $(".attach-button").prop('disabled', true);
-            var reader = new FileReader();
-            var panel = '<div class="box" id="panel_'+x+'"><div class="box-header with-border"><h3 class="truncate">'+file.name+'</h3><div class="box-tools pull-right">'
-            +'<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>'
-            +'<button class="btn btn-box-tool attach_remove" data-widget="remove"><i class="fa fa-times"></i></button></div></div>'
-            +'<div class="box-body" align="center"></div></div>'
-            var str = '<div class="col-md-2 attach_file" file_data="" file_type="'+file.type+'" file_name="'+file.name+'">'+panel+'</div>';
-            attach_list.append(str);
-            var progress = new CircularProgress({
-                radius: 40,
-                strokeStyle: 'green',
-                lineCap: 'round',
-                lineWidth: 5
-            });
-            $("#panel_"+x+" .box-body").append(progress.el);
-            reader.onprogress = function(data) {
-                if (data.lengthComputable) {
-                    var percentComplete = Math.round(data.loaded * 100 / data.total);
-                    progress.update(percentComplete);
+            if(file.size > (25 * 1024 * 1024)){
+                alert("Sorry file is to large, Gmail does not support files larger than 25mb.")
+                $(".attach").val('');
+            } else {
+                x++;
+                $(".attach-button").prop('disabled', true);
+                var reader = new FileReader();
+                var panel = '<div class="box" id="panel_'+x+'"><div class="box-header with-border"><h3 class="truncate">'+file.name+'</h3><div class="box-tools pull-right">'
+                +'<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>'
+                +'<button class="btn btn-box-tool attach_remove" data-widget="remove"><i class="fa fa-times"></i></button></div></div>'
+                +'<div class="box-body" align="center"></div></div>'
+                var str = '<div class="col-md-2 attach_file" file_data="" file_type="'+file.type+'" file_name="'+file.name+'">'+panel+'</div>';
+                attach_list.append(str);
+                var progress = new CircularProgress({
+                    radius: 40,
+                    strokeStyle: 'green',
+                    lineCap: 'round',
+                    lineWidth: 5
+                });
+                $("#panel_"+x+" .box-body").append(progress.el);
+                reader.onprogress = function(data) {
+                    if (data.lengthComputable) {
+                        var percentComplete = Math.round(data.loaded * 100 / data.total);
+                        progress.update(percentComplete);
+                    }
                 }
+                reader.onload = function(e) {
+                    $(".attach-button").prop('disabled', false);
+                    var preview = null;
+                    if(file.type.match("image.*") || file.type.match(/\.(gif|png|jpe?g)$/i)){
+                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="' + e.target.result + '"/><br/>';
+                    }
+                    else if(file.type.match("application/pdf") || file.type.match(/\.(pdf)$/i)){
+                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/pdf.png"/><br/>';
+                    }
+                    else if(file.type.match("text/html") || file.type.match(/\.(htm|html)$/i)){
+                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/html.png"/><br/>';
+                    }
+                    else if(file.type.match("text.*") || file.type.match(/\.(xml|javascript)$/i) || file.type.match(/\.(txt|md|csv|nfo|ini|json|py|php|js|css)$/i)){
+                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/text.png"/><br/>';
+                    }
+                    else if(file.type.match("video.*") || file.type.match(/(ogg|mp4|mp?g|webm|3gp)$/i) || file.type.match(/\.(og?|mp4|webm|mp?g|3gp)$/i)){
+                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/video.png"/><br/>';
+                    }
+                    else if(file.type.match("audio.*") || file.type.match(/(ogg|mp3|mp?g|wav)$/i) || file.type.match(/\.(og?|mp3|mp?g|wav)$/i)){
+                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/audio.png"/><br/>';
+                    }
+                    else if(file.type.match("application/zip") || file.type.match(/\.(zip|tar.gz|rar|gz|tar|7z|zipx)$/i)){
+                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/archive.png"/><br/>';
+                    }
+                    else {
+                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/unknown.png"/><br/>';
+                    }
+                    $("#panel_"+x+" .box-body").html('<p>'+preview+'</p>');
+                    $("#panel_"+x).parent().attr('file_data',e.target.result);
+                    $('.content_first').parent().css('height', $('.content_first').children().height() + 175)
+                };
+                reader.readAsDataURL(file);
             }
-            reader.onload = function(e) {
-                $(".attach-button").prop('disabled', false);
-                var preview = null;
-                if(file.type.match("image.*") || file.type.match(/\.(gif|png|jpe?g)$/i)){
-                    preview = '<img class="img-thumbnail" alt="'+file.name+'" src="' + e.target.result + '"/><br/>';
-                }
-                else if(file.type.match("application/pdf") || file.type.match(/\.(pdf)$/i)){
-                    preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/pdf.png"/><br/>';
-                }
-                else if(file.type.match("text/html") || file.type.match(/\.(htm|html)$/i)){
-                    preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/html.png"/><br/>';
-                }
-                else if(file.type.match("text.*") || file.type.match(/\.(xml|javascript)$/i) || file.type.match(/\.(txt|md|csv|nfo|ini|json|py|php|js|css)$/i)){
-                    preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/text.png"/><br/>';
-                }
-                else if(file.type.match("video.*") || file.type.match(/(ogg|mp4|mp?g|webm|3gp)$/i) || file.type.match(/\.(og?|mp4|webm|mp?g|3gp)$/i)){
-                    preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/video.png"/><br/>';
-                }
-                else if(file.type.match("audio.*") || file.type.match(/(ogg|mp3|mp?g|wav)$/i) || file.type.match(/\.(og?|mp3|mp?g|wav)$/i)){
-                    preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/audio.png"/><br/>';
-                }
-                else if(file.type.match("application/zip") || file.type.match(/\.(zip|tar.gz|rar|gz|tar|7z|zipx)$/i)){
-                    preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/archive.png"/><br/>';
-                }
-                else {
-                    preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/unknown.png"/><br/>';
-                }
-                $("#panel_"+x+" .box-body").html('<p>'+preview+'</p>');
-                $("#panel_"+x).parent().attr('file_data',e.target.result);
-                $('.content_first').parent().css('height', $('.content_first').children().height() + 175)
-            };
-            reader.readAsDataURL(file);
         }
     });
     

@@ -387,16 +387,21 @@ var odoo = require('web.ajax');
             }
             else
             {
-                odoo.jsonRpc('/modal-save-contact', 'call', {
-                    'name': $(this).closest('.modal-content').find('input[name="first_name"]').val(),
-                    'last_name': $(this).closest('.modal-content').find('input[name="last_name"]').val(),
-                    'company_name': $(this).closest('.modal-content').find('input[name="company_name"]').val(),
-                    'email_address': $(this).closest('.modal-content').find('input[name="email_address"]').val(),
-                    'contact_id': $(this).data('contact_id')
-                }).then(function(modal){
-                    $("#edit-contact-modal-sm .close").click();
-                    search_contacts()
-                })
+                var mailformat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+                if($.trim($(this).closest('.modal-content').find('input[name="email_address"]').val().match(mailformat))){
+                    odoo.jsonRpc('/modal-save-contact', 'call', {
+                        'name': $(this).closest('.modal-content').find('input[name="first_name"]').val(),
+                        'last_name': $(this).closest('.modal-content').find('input[name="last_name"]').val(),
+                        'company_name': $(this).closest('.modal-content').find('input[name="company_name"]').val(),
+                        'email_address': $(this).closest('.modal-content').find('input[name="email_address"]').val(),
+                        'contact_id': $(this).data('contact_id')
+                    }).then(function(modal){
+                        $("#edit-contact-modal-sm .close").click();
+                        search_contacts()
+                    })
+                } else {
+                    alert("Please enter valid email address.")
+                }
             }
         })
 
@@ -899,6 +904,8 @@ var odoo = require('web.ajax');
             else if (action == "purge") {
                 purge_mail([$(this).data('email_id')], $(this).data('folder_name'));
             }
+            else
+                alert('Please choose records.');
         });
 
         $(document).on('click', '.list-more-actions', function(){
@@ -930,6 +937,8 @@ var odoo = require('web.ajax');
                     print_mail(selected_records_ids, $('.folders li.active a').data('folder_name'));
                 else if (action == "list_purge")
                     purge_mail(selected_records_ids, $('.folders li.active a').data('folder_name'));
+                else
+                    alert("Please select any valid action!");
             }
         });
 
@@ -970,19 +979,35 @@ var odoo = require('web.ajax');
             });
         }
 
-        function print_mail(email_id, folder_name){
+        function print_mail(email_ids, folder_name){
             ajaxindicatorstart('Please wait...')
-            odoo.jsonRpc('/print-mail', 'call', {
-                'account_id': account_id,
-                'folder_name': folder_name,
-                'email_id': email_id,
-            }).then(function(val){
-                var html = val['str_html'] //'<html><head></head><body>ohai</body></html>';
-                var myWindow = window.open("", "_blank");
-                myWindow.document.write(html);
-            }).then(function(){
-                ajaxindicatorstop()
-            });
+            var length_of_selected_records = email_ids.length;
+            if(length_of_selected_records > 0){
+                function loop(email_ids){
+                    $.each(email_ids, function(key,value) {
+                        odoo.jsonRpc('/print-mail', 'call', {
+                            'account_id': account_id,
+                            'folder_name': folder_name,
+                            'email_id': value,
+                        }).then(function(val){
+                            var html = val['str_html'] //'<html><head></head><body>ohai</body></html>';
+                            var myWindow = window.open("", "_blank");
+                            myWindow.document.write(html);
+                        }).then(function(){
+                            ajaxindicatorstop()
+                        });
+                    })
+                }
+                if (length_of_selected_records > 1){
+                    if(confirm('Are you sure you want to open ' + length_of_selected_records + ' windows?')){
+                        loop(email_ids);
+                    }
+                }else{
+                    loop(email_ids);
+                }
+            } else {
+                alert('Please choose records.')
+            }
         }
 
         function open_new_window(data, email_ids, folder_name){
@@ -1175,60 +1200,65 @@ var odoo = require('web.ajax');
             var file = this.files[0];
             var attach_list = $('.attach_list')
             if (file){
-                x++;
-                $(".attach-button").prop('disabled', true);
-                var reader = new FileReader();
-                var panel = '<div class="box" id="panel_'+x+'"><div class="box-header with-border"><h3 class="truncate">'+file.name+'</h3><div class="box-tools pull-right">'
-                +'<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>'
-                +'<button class="btn btn-box-tool attach_remove" data-widget="remove"><i class="fa fa-times"></i></button></div></div>'
-                +'<div class="box-body" align="center"></div></div>'
-                var str = '<div class="col-md-2 attach_file" file_data="" file_type="'+file.type+'" file_name="'+file.name+'">'+panel+'</div>';
-                attach_list.append(str);
-                var progress = new CircularProgress({
-                    radius: 40,
-                    strokeStyle: 'green',
-                    lineCap: 'round',
-                    lineWidth: 5
-                });
-                $("#panel_"+x+" .box-body").append(progress.el);
-                reader.onprogress = function(data) {
-                    if (data.lengthComputable) {
-                        var percentComplete = Math.round(data.loaded * 100 / data.total);
-                        progress.update(percentComplete);
+                if(file.size > (25 * 1024 * 1024)){
+                    alert("Sorry file is to large, Gmail does not support files larger than 25mb.")
+                    $(".attach").val('');
+                } else {
+                    x++;
+                    $(".attach-button").prop('disabled', true);
+                    var reader = new FileReader();
+                    var panel = '<div class="box" id="panel_'+x+'"><div class="box-header with-border"><h3 class="truncate">'+file.name+'</h3><div class="box-tools pull-right">'
+                    +'<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>'
+                    +'<button class="btn btn-box-tool attach_remove" data-widget="remove"><i class="fa fa-times"></i></button></div></div>'
+                    +'<div class="box-body" align="center"></div></div>'
+                    var str = '<div class="col-md-2 attach_file" file_data="" file_type="'+file.type+'" file_name="'+file.name+'">'+panel+'</div>';
+                    attach_list.append(str);
+                    var progress = new CircularProgress({
+                        radius: 40,
+                        strokeStyle: 'green',
+                        lineCap: 'round',
+                        lineWidth: 5
+                    });
+                    $("#panel_"+x+" .box-body").append(progress.el);
+                    reader.onprogress = function(data) {
+                        if (data.lengthComputable) {
+                            var percentComplete = Math.round(data.loaded * 100 / data.total);
+                            progress.update(percentComplete);
+                        }
                     }
+                    reader.onload = function(e) {
+                        $(".attach-button").prop('disabled', false);
+                        var preview = null;
+                        if(file.type.match("image.*") || file.type.match(/\.(gif|png|jpe?g)$/i)){
+                            preview = '<img class="img-thumbnail" alt="'+file.name+'" src="' + e.target.result + '"/><br/>';
+                        }
+                        else if(file.type.match("application/pdf") || file.type.match(/\.(pdf)$/i)){
+                            preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/pdf.png"/><br/>';
+                        }
+                        else if(file.type.match("text/html") || file.type.match(/\.(htm|html)$/i)){
+                            preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/html.png"/><br/>';
+                        }
+                        else if(file.type.match("text.*") || file.type.match(/\.(xml|javascript)$/i) || file.type.match(/\.(txt|md|csv|nfo|ini|json|py|php|js|css)$/i)){
+                            preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/text.png"/><br/>';
+                        }
+                        else if(file.type.match("video.*") || file.type.match(/(ogg|mp4|mp?g|webm|3gp)$/i) || file.type.match(/\.(og?|mp4|webm|mp?g|3gp)$/i)){
+                            preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/video.png"/><br/>';
+                        }
+                        else if(file.type.match("audio.*") || file.type.match(/(ogg|mp3|mp?g|wav)$/i) || file.type.match(/\.(og?|mp3|mp?g|wav)$/i)){
+                            preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/audio.png"/><br/>';
+                        }
+                        else if(file.type.match("application/zip") || file.type.match(/\.(zip|tar.gz|rar|gz|tar|7z|zipx)$/i)){
+                            preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/archive.png"/><br/>';
+                        }
+                        else {
+                            preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/unknown.png"/><br/>';
+                        }
+                        $("#panel_"+x+" .box-body").html('<p>'+preview+'</p>');
+                        $("#panel_"+x).parent().attr('file_data',e.target.result);
+                        $('.content_first').parent().css('height', $('.content_first').children().height() + 175)
+                    };
+                    reader.readAsDataURL(file);
                 }
-                reader.onload = function(e) {
-                    $(".attach-button").prop('disabled', false);
-                    var preview = null;
-                    if(file.type.match("image.*") || file.type.match(/\.(gif|png|jpe?g)$/i)){
-                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="' + e.target.result + '"/><br/>';
-                    }
-                    else if(file.type.match("application/pdf") || file.type.match(/\.(pdf)$/i)){
-                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/pdf.png"/><br/>';
-                    }
-                    else if(file.type.match("text/html") || file.type.match(/\.(htm|html)$/i)){
-                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/html.png"/><br/>';
-                    }
-                    else if(file.type.match("text.*") || file.type.match(/\.(xml|javascript)$/i) || file.type.match(/\.(txt|md|csv|nfo|ini|json|py|php|js|css)$/i)){
-                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/text.png"/><br/>';
-                    }
-                    else if(file.type.match("video.*") || file.type.match(/(ogg|mp4|mp?g|webm|3gp)$/i) || file.type.match(/\.(og?|mp4|webm|mp?g|3gp)$/i)){
-                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/video.png"/><br/>';
-                    }
-                    else if(file.type.match("audio.*") || file.type.match(/(ogg|mp3|mp?g|wav)$/i) || file.type.match(/\.(og?|mp3|mp?g|wav)$/i)){
-                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/audio.png"/><br/>';
-                    }
-                    else if(file.type.match("application/zip") || file.type.match(/\.(zip|tar.gz|rar|gz|tar|7z|zipx)$/i)){
-                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/archive.png"/><br/>';
-                    }
-                    else {
-                        preview = '<img class="img-thumbnail" alt="'+file.name+'" src="/web/static/src/img/mimetypes/unknown.png"/><br/>';
-                    }
-                    $("#panel_"+x+" .box-body").html('<p>'+preview+'</p>');
-                    $("#panel_"+x).parent().attr('file_data',e.target.result);
-                    $('.content_first').parent().css('height', $('.content_first').children().height() + 175)
-                };
-                reader.readAsDataURL(file);
             }
         });
 
@@ -1374,15 +1404,19 @@ var odoo = require('web.ajax');
             }
             else
             {
-                ajaxindicatorstart('Please wait...')
-            	var self = this;
-	        	create_contact({
-	    			'name': $(this).closest('.modal-content').find('input[name="first_name"]').val(),
-	    			'last_name': $(this).closest('.modal-content').find('input[name="last_name"]').val(),
-	    			'company_name': $(this).closest('.modal-content').find('input[name="company_name"]').val(),
-	    			'email_address': $(this).closest('.modal-content').find('input[name="email_address"]').val(),
-	    		},self)
-
+                var mailformat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+                if($.trim($(this).closest('.modal-content').find('input[name="email_address"]').val().match(mailformat))){
+                    ajaxindicatorstart('Please wait...')
+                    var self = this;
+                    create_contact({
+                        'name': $(this).closest('.modal-content').find('input[name="first_name"]').val(),
+                        'last_name': $(this).closest('.modal-content').find('input[name="last_name"]').val(),
+                        'company_name': $(this).closest('.modal-content').find('input[name="company_name"]').val(),
+                        'email_address': $(this).closest('.modal-content').find('input[name="email_address"]').val(),
+                    },self)
+                } else {
+                    alert("Please enter valid email address.")
+                }
     		}
         })
 

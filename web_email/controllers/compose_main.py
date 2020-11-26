@@ -72,9 +72,11 @@ class composeEmail(webEmail):
             int(kwargs.get('account_id'))).email_address
         data = {
             'mail_type': kwargs.get('mail_type'),
-            'signature': user.signature,
             'personal_email': personal_email,
         }
+        if user.signature:
+            signature = request.env['mail.render.mixin']._replace_local_links(user.signature)
+            data.update({'signature': signature});
         res = {}
         contact_list = []
         reply_email_exist = False
@@ -224,7 +226,7 @@ class composeEmail(webEmail):
                 'folder_names': self.folder_names(mail, mail_server.list_folders()),
             })
             self.disconnect(mail)
-        html_data = request.env['ir.ui.view'].render_template(
+        html_data = request.env['ir.ui.view']._render_template(
             'web_email.compose_mail', data)
         html_data = bytes(html_data.decode("utf-8"), "utf-8")
         html_data = html_data.decode("utf-8")
@@ -260,9 +262,10 @@ class composeEmail(webEmail):
         mail_server = self.authenticate_mail_server(personal_email_credentials_ids.email_address,
                                                     personal_email_credentials_ids.password,
                                                     personal_email_credentials_ids.imap_server)
+        body_replaced = request.env['mail.render.mixin']._replace_local_links(kwargs.get('body'))
         new = MIMEMultipart("mixed")
         body = MIMEMultipart("alternative")
-        body.attach(MIMEText(kwargs.get('body'), "html", 'utf-8'))
+        body.attach(MIMEText(body_replaced, "html", 'utf-8'))
         new.attach(body)
         new["Subject"] = kwargs.get('subject')
         new["To"], all_to_email_list = self.filter_send_mail(kwargs.get('to'))
@@ -274,7 +277,7 @@ class composeEmail(webEmail):
                                             personal_email_credentials_ids.password, personal_email_credentials_ids.imap_server)
         if kwargs.get('partner_id'):
             request.env['mail.message'].sudo().create({
-                'body': kwargs.get('body'),
+                'body': body_replaced,
                 'model': 'res.partner',
                 'res_id': kwargs.get('partner_id'),
                 'subtype_id': request.env['mail.message.subtype'].sudo().search([('name', '=', 'Discussions')], limit=1).id,
